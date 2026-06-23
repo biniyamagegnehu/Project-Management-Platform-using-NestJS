@@ -46,19 +46,22 @@ export class TasksController {
  }
 
 @Post()
+
 @UseGuards(
  ApiKeyGuard,
 )
+
 createTask(
+
  @Body()
- createTaskDto:
+ dto:
   CreateTaskDto,
+
 ) {
 
  return this.tasksService
   .createTask(
-   createTaskDto.title,
-   createTaskDto.description,
+   dto,
   );
 
 }

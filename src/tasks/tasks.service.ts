@@ -5,20 +5,38 @@ import {
 
 import { PrismaService } from '../prisma/prisma.service';
 
+import { CreateTaskDto } from './dto/create-task.dto';
+
 @Injectable()
 export class TasksService {
   constructor(
     private prisma: PrismaService,
   ) {}
 
+  // ← Step 3 change
   getTasks() {
-    return this.prisma.task.findMany();
+    return this.prisma.task.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 
-  async getTaskById(id: number) {
+  // ← Step 4 change
+  async getTaskById(
+    id: number,
+  ) {
     const task =
       await this.prisma.task.findUnique({
-        where: { id },
+        where: {
+          id,
+        },
+
+        select: {
+          id: true,
+          title: true,
+          description: true,
+        },
       });
 
     if (!task) {
@@ -31,14 +49,10 @@ export class TasksService {
   }
 
   createTask(
-    title: string,
-    description?: string,
+    dto: CreateTaskDto,
   ) {
     return this.prisma.task.create({
-      data: {
-        title,
-        description,
-      },
+      data: dto,
     });
   }
 }
