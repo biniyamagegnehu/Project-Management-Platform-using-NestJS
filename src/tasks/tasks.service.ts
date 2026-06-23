@@ -3,24 +3,23 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import { PrismaService } from '../prisma/prisma.service';
+
 @Injectable()
 export class TasksService {
-  private tasks = [
-    {
-      id: 1,
-      title: 'Learn NestJS',
-      description: 'Learn DTO',
-    },
-  ];
+  constructor(
+    private prisma: PrismaService,
+  ) {}
 
   getTasks() {
-    return this.tasks;
+    return this.prisma.task.findMany();
   }
 
-  getTaskById(id: number) {
-    const task = this.tasks.find(
-      (task) => task.id === id,
-    );
+  async getTaskById(id: number) {
+    const task =
+      await this.prisma.task.findUnique({
+        where: { id },
+      });
 
     if (!task) {
       throw new NotFoundException(
@@ -35,15 +34,11 @@ export class TasksService {
     title: string,
     description?: string,
   ) {
-    const task = {
-      id: this.tasks.length + 1,
-      title,
-      description:
-        description ?? '',
-    };
-
-    this.tasks.push(task);
-
-    return task;
+    return this.prisma.task.create({
+      data: {
+        title,
+        description,
+      },
+    });
   }
 }

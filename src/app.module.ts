@@ -3,6 +3,7 @@ import {
  MiddlewareConsumer,
  NestModule,
 } from '@nestjs/common';
+import { PrismaModule } from './prisma/prisma.module';
 
 import { AppController }
 from './app.controller';
@@ -19,6 +20,7 @@ from './common/logger/logger.middleware';
 @Module({
  imports: [
   TasksModule,
+  PrismaModule,
  ],
  controllers: [
   AppController,
