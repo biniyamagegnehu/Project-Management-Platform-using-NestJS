@@ -1,10 +1,11 @@
 import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
+ Body,
+ Controller,
+ Get,
+ Param,
+ ParseIntPipe,
+ Post,
+ UseGuards,
 } from '@nestjs/common';
 
 import { TasksService }
@@ -12,6 +13,11 @@ from './tasks.service';
 
 import { CreateTaskDto }
 from './dto/create-task.dto';
+
+import {
+ ApiKeyGuard,
+}
+from '../common/api-key/api-key.guard';
 
 @Controller('tasks')
 export class TasksController {
@@ -39,16 +45,22 @@ export class TasksController {
    .getTaskById(id);
  }
 
- @Post()
- createTask(
-  @Body()
-  createTaskDto:
-   CreateTaskDto,
- ) {
-  return this.tasksService
-   .createTask(
-    createTaskDto.title,
-   );
- }
+@Post()
+@UseGuards(
+ ApiKeyGuard,
+)
+createTask(
+ @Body()
+ createTaskDto:
+  CreateTaskDto,
+) {
+
+ return this.tasksService
+  .createTask(
+   createTaskDto.title,
+   createTaskDto.description,
+  );
+
+}
 
 }
