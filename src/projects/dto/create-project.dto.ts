@@ -5,7 +5,7 @@ import {
  IsString,
 } from 'class-validator';
 
-export class CreateTaskDto {
+export class CreateProjectDto {
 
  @IsString()
  @IsNotEmpty()
@@ -16,6 +16,6 @@ export class CreateTaskDto {
  description?: string;
 
  @IsInt()
- projectId: number;
+ ownerId: number;
 
 }

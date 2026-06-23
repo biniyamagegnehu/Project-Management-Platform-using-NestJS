@@ -4,6 +4,7 @@ import {
  NestModule,
 } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
+import { ProjectsModule } from './projects/projects.module';
 
 import { AppController }
 from './app.controller';
@@ -21,6 +22,7 @@ from './common/logger/logger.middleware';
  imports: [
   TasksModule,
   PrismaModule,
+  ProjectsModule,
  ],
  controllers: [
   AppController,

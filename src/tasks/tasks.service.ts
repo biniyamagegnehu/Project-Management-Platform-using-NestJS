@@ -48,11 +48,36 @@ export class TasksService {
     return task;
   }
 
-  createTask(
-    dto: CreateTaskDto,
-  ) {
-    return this.prisma.task.create({
-      data: dto,
-    });
-  }
+createTask(
+  dto: CreateTaskDto,
+) {
+
+  return this.prisma.task.create({
+
+    data: {
+
+      title:
+        dto.title,
+
+      description:
+        dto.description,
+
+      project: {
+
+        connect: {
+
+          id:
+            Number(
+              dto.projectId,
+            ),
+
+        },
+
+      },
+
+    },
+
+  });
+
+}
 }
