@@ -15,17 +15,22 @@ import {
 import {
  SignupDto,
 } from './dto/signup.dto';
+import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 
 export class AuthService {
 
- constructor(
+constructor(
 
-  private users:
-   UsersService,
+ private users:
+ UsersService,
 
- ) {}
+ private jwt:
+ JwtService,
+
+){}
 
  async signup(
   dto:
@@ -94,5 +99,68 @@ export class AuthService {
   };
 
  }
+
+ async login(
+ dto:
+ LoginDto,
+){
+
+ const user=
+
+ await this.users
+ .findByEmail(
+  dto.email,
+ );
+
+ if(
+  !user
+ ){
+
+  throw new Error(
+   'Invalid credentials',
+  );
+
+ }
+
+ const valid=
+
+ await bcrypt.compare(
+
+  dto.password,
+
+  user.password,
+
+ );
+
+ if(
+  !valid
+ ){
+
+  throw new Error(
+   'Invalid credentials',
+  );
+
+ }
+
+ const token=
+
+ this.jwt.sign({
+
+  sub:
+   user.id,
+
+  email:
+   user.email,
+
+ });
+
+ return{
+
+  access_token:
+   token,
+
+ };
+
+}
 
 }
