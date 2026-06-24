@@ -27,6 +27,12 @@ import {
  JwtAuthGuard,
 } from '../auth/jwt-auth.guard';
 
+import {
+ GetUser,
+}
+from
+'../auth/decorators/get-user.decorator';
+
 @UseGuards(
  JwtAuthGuard,
 )
@@ -46,20 +52,29 @@ export class ProjectsController {
    ProjectsService,
  ) {}
 
- @Get()
+@Get()
 
 findAll(
 
- @Query()
- query:
- GetProjectsDto,
+ @GetUser()
+ user,
 
-) {
+){
+
+ console.log(
+
+  user,
+
+ );
 
  return this.projectsService
-  .findAll(
-   query,
-  );
+ .findAll({
+
+  page:1,
+
+  limit:10,
+
+ });
 
 }
 
