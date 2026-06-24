@@ -14,6 +14,11 @@ import {
  PrismaModule,
 } from '../prisma/prisma.module';
 
+import {
+ ProjectsRepository,
+}
+from './repositories/projects.repository';
+
 @Module({
 
  imports:[
@@ -24,9 +29,13 @@ import {
   ProjectsController,
  ],
 
- providers:[
-  ProjectsService,
- ],
+providers:[
+
+ ProjectsService,
+
+ ProjectsRepository,
+
+],
 
 })
 

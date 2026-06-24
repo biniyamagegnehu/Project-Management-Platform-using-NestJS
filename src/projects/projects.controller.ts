@@ -64,6 +64,23 @@ findAll(
 
  }
 
- 
+ @Post(
+ 'full',
+)
+
+createFull(
+
+ @Body()
+ dto:
+ CreateProjectDto,
+
+) {
+
+ return this.projectsService
+  .createFull(
+   dto,
+  );
+
+}
 
 }

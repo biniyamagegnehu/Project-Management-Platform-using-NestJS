@@ -13,58 +13,50 @@ import {
  GetProjectsDto,
 }
 from './dto/get-projects.dto';
+import { ProjectsRepository } from './repositories/projects.repository';
 
 @Injectable()
 export class ProjectsService {
 
- constructor(
-  private prisma:
-   PrismaService,
- ) {}
+constructor(
 
- create(
- dto:
- CreateProjectDto,
+ private repository:
+ ProjectsRepository,
+
+) {}
+
+create(
+ dto: CreateProjectDto,
 ) {
 
- return this.prisma.project.create({
+ return this.repository.create({
 
-  data: {
+  title:
+   dto.title,
 
-   title:
-    dto.title,
+  description:
+   dto.description,
 
-   description:
-    dto.description,
+  owner: {
 
-   owner: {
+   connect: {
 
-    connect: {
-
-     id:
-      dto.ownerId,
-
-    },
+    id:
+     dto.ownerId,
 
    },
 
-   tasks:
-    dto.tasks?.length
-     ? {
-
-        create:
-         dto.tasks,
-
-       }
-     : undefined,
-
   },
 
-  include: {
+  tasks:
+   dto.tasks?.length
+   ? {
 
-   tasks:true,
+      create:
+       dto.tasks,
 
-  },
+     }
+   : undefined,
 
  });
 
@@ -105,7 +97,7 @@ async findAll(
  ] =
  await Promise.all([
 
-  this.prisma.project.findMany({
+  this.repository.findMany({
 
    skip:
     (page-1)
@@ -137,11 +129,9 @@ async findAll(
 
   }),
 
-  this.prisma.project.count({
-
-   where,
-
-  }),
+  this.repository.count(
+ where,
+),
 
  ]);
 
@@ -168,6 +158,95 @@ async findAll(
   },
 
  };
+
+}
+
+async createFull(
+ dto: CreateProjectDto,
+) {
+
+ return this.repository
+ .getPrisma()
+ .$transaction(
+
+  async (
+   tx,
+  ) => {
+
+   const project =
+    await tx.project.create({
+
+     data: {
+
+      title:
+       dto.title,
+
+      description:
+       dto.description,
+
+      owner: {
+
+       connect: {
+
+        id:
+         dto.ownerId,
+
+       },
+
+      },
+
+     },
+
+    });
+
+   if (
+    dto.tasks
+    ?.length
+   ) {
+
+    await tx.task.createMany({
+
+     data:
+
+      dto.tasks.map(
+
+       (
+        task,
+       ) => ({
+
+        title:
+         task.title,
+
+        projectId:
+         project.id,
+
+       }),
+
+      ),
+
+    });
+
+   }
+
+   await tx.activity.create({
+
+    data: {
+
+     action:
+      'Project Created',
+
+     projectId:
+      project.id,
+
+    },
+
+   });
+
+   return project;
+
+  },
+
+ );
 
 }
 
