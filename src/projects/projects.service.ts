@@ -19,35 +19,51 @@ export class ProjectsService {
  ) {}
 
  create(
-  dto:
-   CreateProjectDto,
- ) {
+ dto:
+ CreateProjectDto,
+) {
 
-  return this.prisma.project.create({
+ return this.prisma.project.create({
 
-   data: {
+  data: {
 
-    title:
-     dto.title,
+   title:
+    dto.title,
 
-    description:
-     dto.description,
+   description:
+    dto.description,
 
-    owner: {
+   owner: {
 
-     connect: {
+    connect: {
 
-      id:
-       dto.ownerId,
-
-     },
+     id:
+      dto.ownerId,
 
     },
 
    },
 
-  });
+   tasks:
+    dto.tasks?.length
+     ? {
 
- }
+        create:
+         dto.tasks,
+
+       }
+     : undefined,
+
+  },
+
+  include: {
+
+   tasks:true,
+
+  },
+
+ });
+
+}
 
 }
