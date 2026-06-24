@@ -19,6 +19,7 @@ from './tasks/tasks.module';
 import { LoggerMiddleware }
 from './common/logger/logger.middleware';
 import { ConfigModule } from '@nestjs/config';
+import { UsersModule } from './users/users.module';
 
 @Module({
  imports: [
@@ -31,6 +32,7 @@ import { ConfigModule } from '@nestjs/config';
   PrismaModule,
   ProjectsModule,
   AuthModule,
+  UsersModule,
  ],
  controllers: [
   AppController,
