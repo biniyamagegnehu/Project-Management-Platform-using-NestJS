@@ -1,7 +1,9 @@
 import {
  Body,
  Controller,
+ Get,
  Post,
+ Query,
 } from '@nestjs/common';
 
 import {
@@ -11,6 +13,11 @@ import {
 import {
  CreateProjectDto,
 } from './dto/create-project.dto';
+
+import {
+ GetProjectsDto,
+}
+from './dto/get-projects.dto';
 
 @Controller(
  'projects',
@@ -22,6 +29,23 @@ export class ProjectsController {
   private projectsService:
    ProjectsService,
  ) {}
+
+ @Get()
+
+findAll(
+
+ @Query()
+ query:
+ GetProjectsDto,
+
+) {
+
+ return this.projectsService
+  .findAll(
+   query,
+  );
+
+}
 
  @Post()
 
@@ -39,5 +63,7 @@ export class ProjectsController {
    );
 
  }
+
+ 
 
 }

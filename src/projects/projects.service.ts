@@ -10,6 +10,11 @@ import {
  CreateProjectDto,
 } from './dto/create-project.dto';
 
+import {
+ GetProjectsDto,
+}
+from './dto/get-projects.dto';
+
 @Injectable()
 export class ProjectsService {
 
@@ -59,6 +64,66 @@ export class ProjectsService {
   include: {
 
    tasks:true,
+
+  },
+
+ });
+
+}
+
+async findAll(
+ query:
+ GetProjectsDto,
+) {
+
+ const {
+  page,
+  limit,
+  search,
+  sort,
+ } = query;
+
+ return this.prisma.project.findMany({
+
+  skip:
+   (page-1)
+   *
+   limit,
+
+  take:
+   limit,
+
+  where:
+   search
+   ? {
+
+      title: {
+
+       contains:
+        search,
+
+       mode:
+        'insensitive',
+
+      },
+
+     }
+   : undefined,
+
+  orderBy: {
+
+   createdAt:
+    sort
+    ||
+    'desc',
+
+  },
+
+  include: {
+
+   tasks:true,
+
+   owner:true,
 
   },
 
