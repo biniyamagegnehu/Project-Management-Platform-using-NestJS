@@ -1,9 +1,12 @@
 import {
  Injectable,
+ NotFoundException,
+ ForbiddenException,
 } from '@nestjs/common';
 
-import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import {
+ PrismaService,
+} from '../prisma/prisma.service';
 
 import {
  CreateProjectDto,
@@ -11,243 +14,305 @@ import {
 
 import {
  GetProjectsDto,
-}
-from './dto/get-projects.dto';
-import { ProjectsRepository } from './repositories/projects.repository';
+} from './dto/get-projects.dto';
 
+
+import {
+ Prisma,
+} from '@prisma/client';
 @Injectable()
+
 export class ProjectsService {
 
-constructor(
+ constructor(
 
- private repository:
- ProjectsRepository,
+  private prisma:
+   PrismaService,
 
-) {}
+ ) {}
 
-create(
- dto: CreateProjectDto,
-) {
+ async findAll(
 
- return this.repository.create({
+  dto:
+  GetProjectsDto,
 
-  title:
-   dto.title,
+ ){
 
-  description:
-   dto.description,
+  const page =
+   dto.page || 1;
 
-  owner: {
+  const limit =
+   dto.limit || 10;
 
-   connect: {
+  const skip =
+   (page - 1)
+   * limit;
 
-    id:
-     dto.ownerId,
+const where: Prisma.ProjectWhereInput =
 
-   },
+ dto.search
 
-  },
+ ? {
 
-  tasks:
-   dto.tasks?.length
-   ? {
+    title: {
 
-      create:
-       dto.tasks,
+     contains:
+      dto.search,
 
-     }
-   : undefined,
+     mode:
+      Prisma.QueryMode.insensitive,
 
- });
+    },
 
-}
+   }
 
-async findAll(
- query: GetProjectsDto,
-) {
+ : {};
 
- const {
-  page,
-  limit,
-  search,
-  sort,
- } = query;
+  return this.prisma
+  .project
+  .findMany({
 
- const where:
- Prisma.ProjectWhereInput =
- search
-  ? {
+   where,
 
-      title: {
-
-       contains:
-        search,
-
-       mode:
-        Prisma.QueryMode.insensitive,
-
-      },
-
-    }
-  : {};
-
- const [
-  projects,
-  total,
- ] =
- await Promise.all([
-
-  this.repository.findMany({
-
-   skip:
-    (page-1)
-    *
-    limit,
+   skip,
 
    take:
     limit,
 
-   where,
+   include:{
+
+    owner:true,
+
+    tasks:true,
+
+   },
 
    orderBy:{
+
     createdAt:
-     sort ||
      'desc',
+
+   },
+
+  });
+
+ }
+
+ async findOne(
+
+  id:number,
+
+ ){
+
+  const project =
+
+  await this.prisma
+  .project
+  .findUnique({
+
+   where:{
+    id,
    },
 
    include:{
 
     owner:true,
 
-    _count:{
-     select:{
-      tasks:true,
+    tasks:true,
+
+   },
+
+  });
+
+  if(
+   !project
+  ){
+
+   throw new NotFoundException(
+    'Project not found',
+   );
+
+  }
+
+  return project;
+
+ }
+
+ async createFull(
+
+  dto:
+  CreateProjectDto,
+
+  userId:number,
+
+ ){
+
+  return this.prisma
+  .project
+  .create({
+
+   data:{
+
+    title:
+     dto.title,
+
+    description:
+     dto.description,
+
+    owner:{
+
+     connect:{
+
+      id:userId,
+
      },
+
     },
 
    },
 
-  }),
+  });
 
-  this.repository.count(
- where,
-),
+ }
 
- ]);
+ async update(
 
- return {
+  id:number,
 
-  data:
-   projects,
+  dto,
 
-  meta:{
+  user,
 
-   total,
+ ){
 
-   page,
+  const project =
 
-   limit,
+  await this.prisma
+  .project
+  .findUnique({
 
-   pages:
-    Math.ceil(
-     total
-     /
-     limit,
-    ),
+   where:{
+    id,
+   },
 
-  },
+  });
 
- };
+  if(
+   !project
+  ){
 
-}
+   throw new NotFoundException(
+    'Project not found',
+   );
 
-async createFull(
- dto: CreateProjectDto,
-) {
+  }
 
- return this.repository
- .getPrisma()
- .$transaction(
+  const isOwner =
 
-  async (
-   tx,
-  ) => {
+   project.ownerId
+   ===
+   user.id;
 
-   const project =
-    await tx.project.create({
+  const isAdmin =
 
-     data: {
+   user.role
+   ===
+   'ADMIN';
 
-      title:
-       dto.title,
+  if(
 
-      description:
-       dto.description,
+   !isOwner
+   &&
+   !isAdmin
 
-      owner: {
+  ){
 
-       connect: {
+   throw new ForbiddenException(
+    'Not allowed',
+   );
 
-        id:
-         dto.ownerId,
+  }
 
-       },
+  return this.prisma
+  .project
+  .update({
 
-      },
+   where:{
+    id,
+   },
 
-     },
+   data:dto,
 
-    });
+  });
 
-   if (
-    dto.tasks
-    ?.length
-   ) {
+ }
 
-    await tx.task.createMany({
+ async remove(
 
-     data:
+  id:number,
 
-      dto.tasks.map(
+  user,
 
-       (
-        task,
-       ) => ({
+ ){
 
-        title:
-         task.title,
+  const project =
 
-        projectId:
-         project.id,
+  await this.prisma
+  .project
+  .findUnique({
 
-       }),
+   where:{
+    id,
+   },
 
-      ),
+  });
 
-    });
+  if(
+   !project
+  ){
 
-   }
+   throw new NotFoundException(
+    'Project not found',
+   );
 
-   await tx.activity.create({
+  }
 
-    data: {
+  const isOwner =
 
-     action:
-      'Project Created',
+   project.ownerId
+   ===
+   user.id;
 
-     projectId:
-      project.id,
+  const isAdmin =
 
-    },
+   user.role
+   ===
+   'ADMIN';
 
-   });
+  if(
 
-   return project;
+   !isOwner
+   &&
+   !isAdmin
 
-  },
+  ){
 
- );
+   throw new ForbiddenException(
+    'Not allowed',
+   );
 
-}
+  }
+
+  return this.prisma
+  .project
+  .delete({
+
+   where:{
+    id,
+   },
+
+  });
+
+ }
 
 }

@@ -1,7 +1,10 @@
 import {
  Body,
  Controller,
+ Delete,
  Get,
+ Param,
+ Patch,
  Post,
  Query,
 } from '@nestjs/common';
@@ -80,54 +83,97 @@ findAll(
 
 }
 
- @Post()
+@Post()
 
 @UseGuards(
-
  JwtAuthGuard,
-
- RolesGuard,
-
 )
 
-@Roles(
-
- 'ADMIN',
-
-)
-
- create(
-
-  @Body()
-  dto:
-   CreateProjectDto,
-
- ) {
-
-  return this.projectsService
-   .create(
-    dto,
-   );
-
- }
-
- @Post(
- 'full',
-)
-
-createFull(
+create(
 
  @Body()
- dto:
- CreateProjectDto,
+ dto,
 
-) {
+ @GetUser()
+ user,
 
- return this.projectsService
-  .createFull(
-   dto,
-  );
+){
+
+ return this
+ .projectsService
+ .createFull(
+
+  dto,
+
+  user.id,
+
+ );
 
 }
 
+
+@Patch(
+ ':id',
+)
+
+@UseGuards(
+ JwtAuthGuard,
+)
+
+update(
+
+ @Param(
+  'id',
+ )
+ id:string,
+
+ @Body()
+ dto,
+
+ @GetUser()
+ user,
+
+){
+
+ return this
+ .projectsService
+ .update(
+
+  +id,
+
+  dto,
+
+  user,
+
+ );
+
+}
+
+@Delete(
+ ':id',
+)
+
+remove(
+
+ @Param(
+  'id',
+ )
+ id:string,
+
+ @GetUser()
+ user,
+
+){
+
+ return this
+ .projectsService
+ .remove(
+
+  +id,
+
+  user,
+
+ );
+
+}
 }
