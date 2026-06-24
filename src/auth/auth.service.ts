@@ -49,7 +49,17 @@ export class AuthService {
       throw new Error('Invalid credentials');
     }
 
-    const tokens = await this.generateTokens(user.id, user.email);
+    const tokens =
+
+await this.generateTokens({
+
+ id:user.id,
+
+ email:user.email,
+
+ role:user.role,
+
+});
     const hash = await bcrypt.hash(tokens.refresh_token, 10);
 
     await this.users.updateRefreshToken(user.id, hash);
@@ -57,23 +67,34 @@ export class AuthService {
     return tokens;
   }
 
- private async generateTokens(
+private async generateTokens(
 
- userId:number,
+ user:{
+  id:number;
 
- email:string,
+  email:string;
+
+  role:string;
+
+ }
 
 ){
 
  const access =
 
- await this.jwt.signAsync({
+ await this.jwt.signAsync(
 
-  sub:userId,
+ {
 
-  email,
+  sub:user.id,
 
- });
+  email:user.email,
+
+  role:user.role,
+
+ },
+
+ );
 
  const refresh =
 
@@ -81,7 +102,7 @@ export class AuthService {
 
  {
 
-  sub:userId,
+  sub:user.id,
 
  },
 
@@ -115,7 +136,6 @@ export class AuthService {
  };
 
 }
-
   async refresh(userId: number, refreshToken: string) {
     const user = await this.users.findById(userId);
 
@@ -129,6 +149,14 @@ export class AuthService {
       throw new Error('Invalid refresh token');
     }
 
-    return this.generateTokens(user.id, user.email);
+    return this.generateTokens({
+
+ id:user.id,
+
+ email:user.email,
+
+ role:user.role,
+
+});
   }
 }

@@ -50,22 +50,25 @@ secretOrKey:
 
  }
 
- async validate(
+async validate(
 
-  payload:any,
+ payload:any,
 
- ){
+){
 
-  return{
+ return{
 
-   userId:
-    payload.sub,
+  id:
+   payload.sub,
 
-   email:
-    payload.email,
+  email:
+   payload.email,
 
-  };
+  role:
+   payload.role,
 
- }
+ };
+
+}
 
 }

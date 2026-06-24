@@ -32,6 +32,8 @@ import {
 }
 from
 '../auth/decorators/get-user.decorator';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @UseGuards(
  JwtAuthGuard,
@@ -79,6 +81,20 @@ findAll(
 }
 
  @Post()
+
+@UseGuards(
+
+ JwtAuthGuard,
+
+ RolesGuard,
+
+)
+
+@Roles(
+
+ 'ADMIN',
+
+)
 
  create(
 

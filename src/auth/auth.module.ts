@@ -32,6 +32,7 @@ import {
  JwtStrategy,
 }
 from './jwt.strategy';
+import { RolesGuard } from './roles.guard';
 
 @Module({
 
@@ -86,6 +87,7 @@ from './jwt.strategy';
 
   AuthService,
   JwtStrategy,
+  RolesGuard,
 
  ],
 
