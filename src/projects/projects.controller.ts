@@ -19,6 +19,22 @@ import {
 }
 from './dto/get-projects.dto';
 
+import {
+ UseGuards,
+} from '@nestjs/common';
+
+import {
+ JwtAuthGuard,
+} from '../auth/jwt-auth.guard';
+
+@UseGuards(
+ JwtAuthGuard,
+)
+
+@Controller(
+ 'projects',
+)
+
 @Controller(
  'projects',
 )

@@ -23,11 +23,23 @@ import {
  ConfigService,
 } from '@nestjs/config';
 
+import {
+ PassportModule,
+}
+from '@nestjs/passport';
+
+import {
+ JwtStrategy,
+}
+from './jwt.strategy';
+
 @Module({
 
  imports:[
 
   UsersModule,
+
+  PassportModule,
 
   JwtModule.registerAsync({
 
@@ -73,6 +85,7 @@ import {
  providers:[
 
   AuthService,
+  JwtStrategy,
 
  ],
 
