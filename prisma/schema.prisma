@@ -8,17 +8,21 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
 
-  email String @unique
+ id Int @id @default(autoincrement())
 
-  password String
+ email String @unique
 
-  name String
+ password String
 
-  projects Project[]
+ refreshToken String?
 
-  createdAt DateTime @default(now())
+ name String
+
+ projects Project[]
+
+ createdAt DateTime @default(now())
+
 }
 
 model Project {

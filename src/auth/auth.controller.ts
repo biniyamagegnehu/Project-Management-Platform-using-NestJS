@@ -72,4 +72,26 @@ login(
 
 }
 
+@Post(
+ 'refresh',
+)
+
+refresh(
+
+ @Body()
+ body,
+){
+
+ return this.auth
+ .refresh(
+
+  body.userId,
+
+  body
+  .refreshToken,
+
+ );
+
+}
+
 }
