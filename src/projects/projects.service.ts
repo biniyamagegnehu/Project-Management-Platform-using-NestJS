@@ -138,42 +138,73 @@ const where: Prisma.ProjectWhereInput =
 
  }
 
- async createFull(
+async createFull(
 
-  dto:
-  CreateProjectDto,
+ dto,
 
-  userId:number,
+ userId:number,
 
- ){
+){
 
-  return this.prisma
-  .project
-  .create({
+ return this.prisma
+ .$transaction(
 
-   data:{
+ async (
+  tx,
+ )=>{
 
-    title:
-     dto.title,
+ const project =
 
-    description:
-     dto.description,
+ await tx
+ .project
+ .create({
 
-    owner:{
+  data:{
 
-     connect:{
+   title:
+   dto.title,
 
-      id:userId,
+   description:
+   dto.description,
 
-     },
+   owner:{
+
+    connect:{
+
+     id:userId,
 
     },
 
    },
 
-  });
+  },
 
- }
+ });
+
+ await tx
+ .activity
+ .create({
+
+  data:{
+
+   action:
+
+   `Created project ${project.title}`,
+
+   projectId:
+   project.id,
+
+  },
+
+ });
+
+ return project;
+
+ },
+
+ );
+
+}
 
  async update(
 

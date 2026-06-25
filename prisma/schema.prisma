@@ -14,7 +14,6 @@ enum Role {
 }
 
 model User {
-
   id Int @id @default(autoincrement())
 
   email String @unique
@@ -30,7 +29,6 @@ model User {
   projects Project[]
 
   createdAt DateTime @default(now())
-
 }
 
 model Project {
