@@ -20,6 +20,7 @@ import { LoggerMiddleware }
 from './common/logger/logger.middleware';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
+import { AppCacheModule } from './cache/cache.module';
 
 @Module({
  imports: [
@@ -28,6 +29,7 @@ import { UsersModule } from './users/users.module';
    isGlobal:true,
 
   }),
+  AppCacheModule,
   TasksModule,
   PrismaModule,
   ProjectsModule,

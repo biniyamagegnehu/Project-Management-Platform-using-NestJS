@@ -2,6 +2,7 @@ import {
  Injectable,
  NotFoundException,
  ForbiddenException,
+ Inject,
 } from '@nestjs/common';
 
 import {
@@ -20,83 +21,91 @@ import {
 import {
  Prisma,
 } from '@prisma/client';
+
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+
+import type { Cache } from 'cache-manager';
+
 @Injectable()
 
 export class ProjectsService {
 
- constructor(
+constructor(
 
-  private prisma:
-   PrismaService,
+ private prisma:
+ PrismaService,
 
- ) {}
+ @Inject(
+  CACHE_MANAGER,
+ )
+
+ private cache:
+ Cache,
+
+){}
 
  async findAll(
+ dto,
+){
 
-  dto:
-  GetProjectsDto,
+ const key =
 
+ `projects:
+ ${dto.page}
+ :
+ ${dto.limit}`;
+
+ const cached =
+
+ await this.cache
+ .get(key);
+
+ if(
+  cached
  ){
 
-  const page =
-   dto.page || 1;
+  console.log(
+   'CACHE HIT',
+  );
 
-  const limit =
-   dto.limit || 10;
-
-  const skip =
-   (page - 1)
-   * limit;
-
-const where: Prisma.ProjectWhereInput =
-
- dto.search
-
- ? {
-
-    title: {
-
-     contains:
-      dto.search,
-
-     mode:
-      Prisma.QueryMode.insensitive,
-
-    },
-
-   }
-
- : {};
-
-  return this.prisma
-  .project
-  .findMany({
-
-   where,
-
-   skip,
-
-   take:
-    limit,
-
-   include:{
-
-    owner:true,
-
-    tasks:true,
-
-   },
-
-   orderBy:{
-
-    createdAt:
-     'desc',
-
-   },
-
-  });
+  return cached;
 
  }
+
+ console.log(
+  'CACHE MISS',
+ );
+
+ const projects =
+
+ await this.prisma
+ .project
+ .findMany({
+
+  include:{
+
+   owner:true,
+
+   tasks:true,
+
+  },
+
+ });
+
+ await this.cache
+ .set(
+
+  key,
+
+  projects,
+
+  60000,
+
+ );
+
+ return projects;
+
+}
 
  async findOne(
 
@@ -197,6 +206,8 @@ async createFull(
   },
 
  });
+
+await this.cache.del(`projects:${userId}`);
 
  return project;
 
